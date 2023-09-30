@@ -11,6 +11,7 @@ class Game:
         seeds = self.board[move]
         self.board[move] = 0
 
+        #seeding (TODO check rule on seeding back to cell)
         idx = move
         while seeds > 0:
             idx = (idx + 1) % 12
@@ -18,10 +19,17 @@ class Game:
             seeds -= 1
 
         # Capturing
-        while 6 <= idx <= 11 and (self.board[idx] == 2 or self.board[idx] == 3):
-            self.scores[self.next_player] += self.board[idx]
-            self.board[idx] = 0
-            idx -= 1
+        if self.next_player:
+            while 0 <= idx <= 5 and (self.board[idx] == 2 or self.board[idx] == 3):
+                self.scores[self.next_player] += self.board[idx]
+                self.board[idx] = 0
+                idx -= 1
+                
+        else:
+            while 6 <= idx <= 11 and (self.board[idx] == 2 or self.board[idx] == 3):
+                self.scores[self.next_player] += self.board[idx]
+                self.board[idx] = 0
+                idx -= 1
 
         # Switch player
         self.next_player = 1 - self.next_player
@@ -41,18 +49,19 @@ class Game:
 
     def print_board(self):
         """Print the game board."""
-        print(' '.join(str(x) for x in self.board[6:12][::-1]))
-        print(' '.join(str(x) for x in self.board[:6]))
+        print(' '.join(str(x) for x in self.board[6:12][::-1]) + f"  <{self.scores[1]}>")
+        print(' '.join(str(x) for x in self.board[:6]) + f"  <{self.scores[0]}>")
 
     def is_over(self):
         """Check if the game is over."""
-        return all(cell == 0 for cell in self.board[:6]) or all(cell == 0 for cell in self.board[6:12])
+        return any(x > 24 for x in self.scores) or all(cell == 0 for cell in self.board[:6]) or all(cell == 0 for cell in self.board[6:12])
 
 
 if __name__ == "__main__":
-	game = Game()
+    game = Game()
 
-	while not game.is_over():
-		game.print_board()
-		print(game.get_all_legal_moves_for_next_player())
-		game.play(int(input(f"player {game.next_player}, please enter your move : ")))
+    while not game.is_over():
+        print()
+        game.print_board()
+        print(game.get_all_legal_moves_for_next_player())
+        game.play(int(input(f"player {game.next_player}, please enter your move : ")))
